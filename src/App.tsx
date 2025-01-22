@@ -211,7 +211,10 @@ function App() {
 				onClick={handleContainerClick}
 			>
 				<div
-					onClick={(e) => e.stopPropagation()}
+					onClick={(e) => {
+						e.stopPropagation();
+						setShowModal(true);
+					}}
 					className="text-8xl font-bold mb-12 cursor-pointer text-gray-800 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
 				>
 					{formatTime(totalSeconds)}
