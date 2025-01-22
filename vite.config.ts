@@ -25,7 +25,8 @@ export default defineConfig({
       'X-Frame-Options': 'SAMEORIGIN',
       // Chrome-specific headers
       'X-Chrome-Extension-Policy': 'block',
-      'X-Webkit-CSP': 'default-src * \'unsafe-inline\' \'unsafe-eval\'; script-src * \'unsafe-inline\' \'unsafe-eval\'; object-src \'none\';'
+      'X-Webkit-CSP': 'default-src * \'unsafe-inline\' \'unsafe-eval\'; script-src * \'unsafe-inline\' \'unsafe-eval\'; object-src \'none\';',
+      'Content-Type': 'application/javascript',
     }
   },
 });
