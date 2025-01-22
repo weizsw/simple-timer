@@ -1,5 +1,6 @@
 import { Moon, Play, RotateCcw, Square, Sun } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 interface TimeInputModalProps {
 	isOpen: boolean;
@@ -93,11 +94,14 @@ function TimeInputModal({ isOpen, onClose }: TimeInputModalProps) {
 const Terminal = ({ onClose }: { onClose: () => void }) => {
 	return (
 		<div
-			className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-40 
-						 animate-in fade-in duration-300"
+			className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 
+						 animate-in fade-in duration-300 slide-in-from-bottom-4 cursor-pointer"
 			onClick={onClose}
 		>
-			<div className="w-full max-w-3xl h-96 bg-black/95 rounded-lg p-4 font-mono text-green-500 overflow-hidden">
+			<div
+				className="w-full h-full bg-black/80 font-mono text-green-500 overflow-hidden p-8
+						animate-in zoom-in-95 duration-300"
+			>
 				<div className="animate-typing">
 					<p>$ initiating timer sequence...</p>
 					<p className="mt-2">$ loading system components...</p>
@@ -181,6 +185,12 @@ function App() {
 		}
 	};
 
+	const handleContainerClick = (e: React.MouseEvent) => {
+		if (isRunning && e.target === e.currentTarget) {
+			setShowTerminal(true);
+		}
+	};
+
 	return (
 		<div
 			className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
@@ -196,9 +206,12 @@ function App() {
 				)}
 			</button>
 
-			<div className="container mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-screen">
+			<div
+				className="container mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-screen"
+				onClick={handleContainerClick}
+			>
 				<div
-					onClick={() => !isRunning && setShowModal(true)}
+					onClick={(e) => e.stopPropagation()}
 					className="text-8xl font-bold mb-12 cursor-pointer text-gray-800 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
 				>
 					{formatTime(totalSeconds)}
