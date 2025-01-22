@@ -178,7 +178,6 @@ function App() {
 				if (permission === "granted") {
 					new Notification("Timer Complete!", {
 						body: "Your timer has finished.",
-						icon: "/vite.svg",
 					});
 				}
 			});
