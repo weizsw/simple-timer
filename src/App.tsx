@@ -207,18 +207,6 @@ function App() {
 		return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 	};
 
-	const showNotification = () => {
-		if ("Notification" in window) {
-			Notification.requestPermission().then((permission) => {
-				if (permission === "granted") {
-					new Notification("Timer Complete!", {
-						body: "Your timer has finished.",
-					});
-				}
-			});
-		}
-	};
-
 	const handleContainerClick = (e: React.MouseEvent) => {
 		if (isRunning && e.target === e.currentTarget) {
 			setShowTerminal(true);
