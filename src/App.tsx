@@ -91,7 +91,10 @@ function TimeInputModal({ isOpen, onClose }: TimeInputModalProps) {
 	);
 }
 
-const Terminal = ({ onClose }: { onClose: () => void }) => {
+const Terminal = ({
+	onClose,
+	type = "start",
+}: { onClose: () => void; type?: "start" | "complete" }) => {
 	return (
 		<div
 			className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 
@@ -99,15 +102,31 @@ const Terminal = ({ onClose }: { onClose: () => void }) => {
 			onClick={onClose}
 		>
 			<div
-				className="w-full h-full bg-black/80 font-mono text-green-500 overflow-hidden p-8
-						animate-in zoom-in-95 duration-300"
+				className={`w-full h-full font-mono overflow-hidden p-8
+						animate-in zoom-in-95 duration-300 ${
+							type === "complete"
+								? "bg-red-950/80 text-red-500"
+								: "bg-black/80 text-green-500"
+						}`}
 			>
 				<div className="animate-typing">
-					<p>$ initiating timer sequence...</p>
-					<p className="mt-2">$ loading system components...</p>
-					<p className="mt-2">$ calibrating time measurements...</p>
-					<p className="mt-2">$ establishing notification protocols...</p>
-					<p className="mt-2">$ timer active_</p>
+					{type === "complete" ? (
+						<>
+							<p>$ timer sequence completed!</p>
+							<p className="mt-2">$ initiating shutdown sequence...</p>
+							<p className="mt-2">$ saving session data...</p>
+							<p className="mt-2">$ terminating processes...</p>
+							<p className="mt-2">$ timer stopped_</p>
+						</>
+					) : (
+						<>
+							<p>$ initiating timer sequence...</p>
+							<p className="mt-2">$ loading system components...</p>
+							<p className="mt-2">$ calibrating time measurements...</p>
+							<p className="mt-2">$ establishing notification protocols...</p>
+							<p className="mt-2">$ timer active_</p>
+						</>
+					)}
 					<p className="mt-4 text-xs text-gray-500">Click anywhere to close</p>
 				</div>
 			</div>
@@ -124,6 +143,7 @@ function App() {
 	const [isRunning, setIsRunning] = useState(false);
 	const [totalSeconds, setTotalSeconds] = useState(0);
 	const [showTerminal, setShowTerminal] = useState(false);
+	const [showCompletionTerminal, setShowCompletionTerminal] = useState(false);
 
 	useEffect(() => {
 		if (darkMode) {
@@ -141,7 +161,8 @@ function App() {
 				setTotalSeconds((prev) => {
 					if (prev <= 1) {
 						setIsRunning(false);
-						showNotification();
+						setShowTerminal(false);
+						setShowCompletionTerminal(true);
 						return 0;
 					}
 					return prev - 1;
@@ -155,6 +176,20 @@ function App() {
 	useEffect(() => {
 		setTotalSeconds(hours * 3600 + minutes * 60 + seconds);
 	}, [hours, minutes, seconds]);
+
+	useEffect(() => {
+		const defaultTitle = "Simer";
+
+		if (isRunning && totalSeconds > 0) {
+			document.title = `(${formatTime(totalSeconds)}) ${defaultTitle}`;
+		} else {
+			document.title = defaultTitle;
+		}
+
+		return () => {
+			document.title = defaultTitle;
+		};
+	}, [totalSeconds, isRunning]);
 
 	const handleTimeSet = (newHours?: number, newMinutes?: number) => {
 		if (newHours !== undefined && newMinutes !== undefined) {
@@ -250,7 +285,15 @@ function App() {
 				</div>
 			</div>
 
-			{showTerminal && <Terminal onClose={() => setShowTerminal(false)} />}
+			{showTerminal && (
+				<Terminal onClose={() => setShowTerminal(false)} type="start" />
+			)}
+			{showCompletionTerminal && (
+				<Terminal
+					onClose={() => setShowCompletionTerminal(false)}
+					type="complete"
+				/>
+			)}
 			<TimeInputModal isOpen={showModal} onClose={handleTimeSet} />
 		</div>
 	);
