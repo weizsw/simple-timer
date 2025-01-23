@@ -170,7 +170,7 @@ function TimeInputModal({
 										className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 									>
 										<option value="none">None</option>
-										<option value="bark">Bark</option>
+										<option value="bark">Bark (iOS)</option>
 										<option value="serverchan3">Server Chan 3</option>
 									</select>
 									{(notificationSettings.service === "serverchan3" ||
