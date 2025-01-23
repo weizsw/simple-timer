@@ -171,7 +171,7 @@ function TimeInputModal({
 									>
 										<option value="none">None</option>
 										<option value="bark">Bark (iOS)</option>
-										<option value="serverchan3">Server Chan 3</option>
+										<option value="serverchan3">ServerChan 3</option>
 									</select>
 									{(notificationSettings.service === "serverchan3" ||
 										notificationSettings.service === "bark") && (
