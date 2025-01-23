@@ -173,13 +173,23 @@ function TimeInputModal({
 										<option value="bark">Bark</option>
 										<option value="serverchan3">Server Chan 3</option>
 									</select>
-									{notificationSettings.service === "serverchan3" && (
+									{(notificationSettings.service === "serverchan3" ||
+										notificationSettings.service === "bark") && (
 										<button
 											onClick={() =>
-												window.open("https://sc3.ft07.com/", "_blank")
+												window.open(
+													notificationSettings.service === "serverchan3"
+														? "https://sc3.ft07.com/"
+														: "https://bark.day.app/#/",
+													"_blank",
+												)
 											}
 											className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
-											title="Get Server Chan 3 credentials"
+											title={
+												notificationSettings.service === "serverchan3"
+													? "Get Server Chan 3 credentials"
+													: "Get Bark App"
+											}
 										>
 											?
 										</button>
