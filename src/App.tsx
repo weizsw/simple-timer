@@ -1,6 +1,7 @@
 import { Moon, Play, RotateCcw, Square, Sun } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
 
 interface TimeInputModalProps {
 	isOpen: boolean;
@@ -9,11 +10,15 @@ interface TimeInputModalProps {
 	onNotificationChange: (settings: NotificationSettings) => void;
 }
 
-type NotificationService = "none" | "bark";
+type NotificationService = "none" | "bark" | "serverchan3";
 
 interface NotificationSettings {
 	service: NotificationService;
 	barkKey?: string;
+	serverChan3?: {
+		uid: string;
+		key: string;
+	};
 }
 
 const presetTimes = [
@@ -40,141 +45,226 @@ function TimeInputModal({
 			notificationSettings.barkKey
 		) {
 			try {
-				await fetch(
+				const response = await fetch(
 					`https://api.day.app/${notificationSettings.barkKey}/Test Notification?level=critical&volume=5`,
 				);
+				if (response.ok) {
+					toast.success("Bark notification sent successfully");
+				} else {
+					toast.error("Failed to send Bark notification");
+				}
 			} catch (error) {
+				toast.error("Failed to send Bark notification");
+				console.error("Failed to send test notification:", error);
+			}
+		} else if (
+			notificationSettings.service === "serverchan3" &&
+			notificationSettings.serverChan3
+		) {
+			try {
+				const response = await fetch(
+					`https://${notificationSettings.serverChan3.uid}.push.ft07.com/send/${notificationSettings.serverChan3.key}.send?title=Test Notification&desp=This is a test notification`,
+				);
+				if (response.ok) {
+					toast.success("ServerChan notification sent successfully");
+				} else {
+					toast.error("Failed to send ServerChan notification");
+				}
+			} catch (error) {
+				toast.error("Failed to send ServerChan notification");
 				console.error("Failed to send test notification:", error);
 			}
 		}
 	};
 
 	return (
-		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-			<div className="flex gap-4">
-				<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
-					<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-						Set Timer
-					</h2>
+		<>
+			<Toaster position="top-center" />
+			<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+				<div className="flex gap-4">
+					<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
+						<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+							Set Timer
+						</h2>
 
-					<div className="space-y-4">
-						<div className="flex gap-4">
-							<div className="flex-1">
-								<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-									Hours
-								</label>
-								<input
-									type="number"
-									min="0"
-									max="23"
-									value={hours}
-									onChange={(e) => setHours(e.target.value)}
-									className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-								/>
+						<div className="space-y-4">
+							<div className="flex gap-4">
+								<div className="flex-1">
+									<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+										Hours
+									</label>
+									<input
+										type="number"
+										min="0"
+										max="23"
+										value={hours}
+										onChange={(e) => setHours(e.target.value)}
+										className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									/>
+								</div>
+								<div className="flex-1">
+									<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+										Minutes
+									</label>
+									<input
+										type="number"
+										min="0"
+										max="59"
+										value={minutes}
+										onChange={(e) => setMinutes(e.target.value)}
+										className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									/>
+								</div>
 							</div>
-							<div className="flex-1">
-								<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-									Minutes
-								</label>
-								<input
-									type="number"
-									min="0"
-									max="59"
-									value={minutes}
-									onChange={(e) => setMinutes(e.target.value)}
-									className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-								/>
-							</div>
-						</div>
 
-						<div className="grid grid-cols-2 gap-2">
-							{presetTimes.map((preset) => (
+							<div className="grid grid-cols-2 gap-2">
+								{presetTimes.map((preset) => (
+									<button
+										key={preset.label}
+										onClick={() => onClose(preset.hours, preset.minutes)}
+										className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-gray-800 dark:text-white"
+									>
+										{preset.label}
+									</button>
+								))}
+							</div>
+
+							<div className="flex gap-2 mt-6">
 								<button
-									key={preset.label}
-									onClick={() => onClose(preset.hours, preset.minutes)}
-									className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-gray-800 dark:text-white"
+									onClick={() =>
+										onClose(Number.parseInt(hours), Number.parseInt(minutes))
+									}
+									className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
 								>
-									{preset.label}
+									Set Timer
 								</button>
-							))}
-						</div>
-
-						<div className="flex gap-2 mt-6">
-							<button
-								onClick={() =>
-									onClose(Number.parseInt(hours), Number.parseInt(minutes))
-								}
-								className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-							>
-								Set Timer
-							</button>
-							<button
-								onClick={() => onClose()}
-								className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-							>
-								Cancel
-							</button>
+								<button
+									onClick={() => onClose()}
+									className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+								>
+									Cancel
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
-					<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-						Notification Settings
-					</h2>
+					<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
+						<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+							Notification Settings
+						</h2>
 
-					<div className="space-y-4">
-						<div>
-							<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-								Service
-							</label>
-							<select
-								value={notificationSettings.service}
-								onChange={(e) =>
-									onNotificationChange({
-										...notificationSettings,
-										service: e.target.value as NotificationService,
-									})
-								}
-								className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-							>
-								<option value="none">None</option>
-								<option value="bark">Bark</option>
-							</select>
-						</div>
-
-						{notificationSettings.service === "bark" && (
+						<div className="space-y-4">
 							<div>
 								<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-									Bark Key
+									Service
 								</label>
-								<input
-									type="text"
-									value={notificationSettings.barkKey || ""}
-									onChange={(e) =>
-										onNotificationChange({
-											...notificationSettings,
-											barkKey: e.target.value,
-										})
-									}
-									className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-									placeholder="Enter your Bark key"
-								/>
+								<div className="flex items-center gap-2">
+									<select
+										value={notificationSettings.service}
+										onChange={(e) =>
+											onNotificationChange({
+												...notificationSettings,
+												service: e.target.value as NotificationService,
+											})
+										}
+										className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									>
+										<option value="none">None</option>
+										<option value="bark">Bark</option>
+										<option value="serverchan3">Server Chan 3</option>
+									</select>
+									{notificationSettings.service === "serverchan3" && (
+										<button
+											onClick={() =>
+												window.open("https://sc3.ft07.com/", "_blank")
+											}
+											className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+											title="Get Server Chan 3 credentials"
+										>
+											?
+										</button>
+									)}
+								</div>
 							</div>
-						)}
 
-						{notificationSettings.service !== "none" && (
-							<button
-								onClick={testNotification}
-								className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-							>
-								Test Notification
-							</button>
-						)}
+							{notificationSettings.service === "bark" && (
+								<div>
+									<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+										Bark Key
+									</label>
+									<input
+										type="text"
+										value={notificationSettings.barkKey || ""}
+										onChange={(e) =>
+											onNotificationChange({
+												...notificationSettings,
+												barkKey: e.target.value,
+											})
+										}
+										className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+										placeholder="Enter your Bark key"
+									/>
+								</div>
+							)}
+
+							{notificationSettings.service === "serverchan3" && (
+								<>
+									<div>
+										<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+											UID
+										</label>
+										<input
+											type="text"
+											value={notificationSettings.serverChan3?.uid || ""}
+											onChange={(e) =>
+												onNotificationChange({
+													...notificationSettings,
+													serverChan3: {
+														...notificationSettings.serverChan3,
+														uid: e.target.value,
+													},
+												})
+											}
+											className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+											placeholder="Enter your UID"
+										/>
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+											Send Key
+										</label>
+										<input
+											type="text"
+											value={notificationSettings.serverChan3?.key || ""}
+											onChange={(e) =>
+												onNotificationChange({
+													...notificationSettings,
+													serverChan3: {
+														...notificationSettings.serverChan3,
+														key: e.target.value,
+													},
+												})
+											}
+											className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+											placeholder="Enter your Send Key"
+										/>
+									</div>
+								</>
+							)}
+
+							{notificationSettings.service !== "none" && (
+								<button
+									onClick={testNotification}
+									className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+								>
+									Test Notification
+								</button>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }
 
@@ -320,6 +410,17 @@ function App() {
 			try {
 				await fetch(
 					`https://api.day.app/${notificationSettings.barkKey}/Time to go home?level=critical&volume=5`,
+				);
+			} catch (error) {
+				console.error("Failed to send notification:", error);
+			}
+		} else if (
+			notificationSettings.service === "serverchan3" &&
+			notificationSettings.serverChan3
+		) {
+			try {
+				await fetch(
+					`https://${notificationSettings.serverChan3.uid}.push.ft07.com/send/${notificationSettings.serverChan3.key}.send?title=Simer Notification&desp=Time to go home!`,
 				);
 			} catch (error) {
 				console.error("Failed to send notification:", error);
