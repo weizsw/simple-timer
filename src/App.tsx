@@ -8,10 +8,10 @@ interface TimeInputModalProps {
 }
 
 const presetTimes = [
+	{ hours: 4, minutes: 0, label: "4:00" },
+	{ hours: 5, minutes: 0, label: "5:00" },
 	{ hours: 9, minutes: 30, label: "9:30" },
 	{ hours: 10, minutes: 0, label: "10:00" },
-	{ hours: 10, minutes: 30, label: "10:30" },
-	{ hours: 11, minutes: 0, label: "11:00" },
 ];
 
 function TimeInputModal({ isOpen, onClose }: TimeInputModalProps) {
