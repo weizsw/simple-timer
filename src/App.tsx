@@ -5,6 +5,15 @@ import { useEffect, useState } from "react";
 interface TimeInputModalProps {
 	isOpen: boolean;
 	onClose: (hours?: number, minutes?: number) => void;
+	notificationSettings: NotificationSettings;
+	onNotificationChange: (settings: NotificationSettings) => void;
+}
+
+type NotificationService = "none" | "bark";
+
+interface NotificationSettings {
+	service: NotificationService;
+	barkKey?: string;
 }
 
 const presetTimes = [
@@ -14,76 +23,154 @@ const presetTimes = [
 	{ hours: 10, minutes: 0, label: "10:00" },
 ];
 
-function TimeInputModal({ isOpen, onClose }: TimeInputModalProps) {
+function TimeInputModal({
+	isOpen,
+	onClose,
+	notificationSettings,
+	onNotificationChange,
+}: TimeInputModalProps) {
 	const [hours, setHours] = useState("0");
 	const [minutes, setMinutes] = useState("0");
 
 	if (!isOpen) return null;
 
+	const testNotification = async () => {
+		if (
+			notificationSettings.service === "bark" &&
+			notificationSettings.barkKey
+		) {
+			try {
+				await fetch(
+					`https://api.day.app/${notificationSettings.barkKey}/Test Notification?level=critical&volume=5`,
+				);
+			} catch (error) {
+				console.error("Failed to send test notification:", error);
+			}
+		}
+	};
+
 	return (
 		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-			<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
-				<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-					Set Timer
-				</h2>
+			<div className="flex gap-4">
+				<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
+					<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+						Set Timer
+					</h2>
 
-				<div className="space-y-4">
-					<div className="flex gap-4">
-						<div className="flex-1">
-							<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-								Hours
-							</label>
-							<input
-								type="number"
-								min="0"
-								max="23"
-								value={hours}
-								onChange={(e) => setHours(e.target.value)}
-								className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-							/>
+					<div className="space-y-4">
+						<div className="flex gap-4">
+							<div className="flex-1">
+								<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+									Hours
+								</label>
+								<input
+									type="number"
+									min="0"
+									max="23"
+									value={hours}
+									onChange={(e) => setHours(e.target.value)}
+									className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+								/>
+							</div>
+							<div className="flex-1">
+								<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+									Minutes
+								</label>
+								<input
+									type="number"
+									min="0"
+									max="59"
+									value={minutes}
+									onChange={(e) => setMinutes(e.target.value)}
+									className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+								/>
+							</div>
 						</div>
-						<div className="flex-1">
-							<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-								Minutes
-							</label>
-							<input
-								type="number"
-								min="0"
-								max="59"
-								value={minutes}
-								onChange={(e) => setMinutes(e.target.value)}
-								className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-							/>
-						</div>
-					</div>
 
-					<div className="grid grid-cols-2 gap-2">
-						{presetTimes.map((preset) => (
+						<div className="grid grid-cols-2 gap-2">
+							{presetTimes.map((preset) => (
+								<button
+									key={preset.label}
+									onClick={() => onClose(preset.hours, preset.minutes)}
+									className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-gray-800 dark:text-white"
+								>
+									{preset.label}
+								</button>
+							))}
+						</div>
+
+						<div className="flex gap-2 mt-6">
 							<button
-								key={preset.label}
-								onClick={() => onClose(preset.hours, preset.minutes)}
-								className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-gray-800 dark:text-white"
+								onClick={() =>
+									onClose(Number.parseInt(hours), Number.parseInt(minutes))
+								}
+								className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
 							>
-								{preset.label}
+								Set Timer
 							</button>
-						))}
+							<button
+								onClick={() => onClose()}
+								className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+							>
+								Cancel
+							</button>
+						</div>
 					</div>
+				</div>
 
-					<div className="flex gap-2 mt-6">
-						<button
-							onClick={() =>
-								onClose(Number.parseInt(hours), Number.parseInt(minutes))
-							}
-							className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-						>
-							Set Timer
-						</button>
-						<button
-							onClick={() => onClose()}
-							className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-						>
-							Cancel
-						</button>
+				<div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-96 shadow-2xl">
+					<h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+						Notification Settings
+					</h2>
+
+					<div className="space-y-4">
+						<div>
+							<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+								Service
+							</label>
+							<select
+								value={notificationSettings.service}
+								onChange={(e) =>
+									onNotificationChange({
+										...notificationSettings,
+										service: e.target.value as NotificationService,
+									})
+								}
+								className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							>
+								<option value="none">None</option>
+								<option value="bark">Bark</option>
+							</select>
+						</div>
+
+						{notificationSettings.service === "bark" && (
+							<div>
+								<label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+									Bark Key
+								</label>
+								<input
+									type="text"
+									value={notificationSettings.barkKey || ""}
+									onChange={(e) =>
+										onNotificationChange({
+											...notificationSettings,
+											barkKey: e.target.value,
+										})
+									}
+									className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									placeholder="Enter your Bark key"
+								/>
+							</div>
+						)}
+
+						{notificationSettings.service !== "none" && (
+							<button
+								onClick={testNotification}
+								className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+							>
+								Test Notification
+							</button>
+						)}
 					</div>
 				</div>
 			</div>
@@ -144,6 +231,11 @@ function App() {
 	const [totalSeconds, setTotalSeconds] = useState(0);
 	const [showTerminal, setShowTerminal] = useState(false);
 	const [showCompletionTerminal, setShowCompletionTerminal] = useState(false);
+	const [notificationSettings, setNotificationSettings] =
+		useState<NotificationSettings>(() => {
+			const saved = localStorage.getItem("notificationSettings");
+			return saved ? JSON.parse(saved) : { service: "none" };
+		});
 
 	useEffect(() => {
 		if (darkMode) {
@@ -191,6 +283,13 @@ function App() {
 		};
 	}, [totalSeconds, isRunning]);
 
+	useEffect(() => {
+		localStorage.setItem(
+			"notificationSettings",
+			JSON.stringify(notificationSettings),
+		);
+	}, [notificationSettings]);
+
 	const handleTimeSet = (newHours?: number, newMinutes?: number) => {
 		if (newHours !== undefined && newMinutes !== undefined) {
 			setHours(newHours);
@@ -212,6 +311,42 @@ function App() {
 			setShowTerminal(true);
 		}
 	};
+
+	const sendNotification = async () => {
+		if (
+			notificationSettings.service === "bark" &&
+			notificationSettings.barkKey
+		) {
+			try {
+				await fetch(
+					`https://api.day.app/${notificationSettings.barkKey}/Time to go home?level=critical&volume=5`,
+				);
+			} catch (error) {
+				console.error("Failed to send notification:", error);
+			}
+		}
+	};
+
+	useEffect(() => {
+		let interval: number;
+
+		if (isRunning && totalSeconds > 0) {
+			interval = setInterval(() => {
+				setTotalSeconds((prev) => {
+					if (prev <= 1) {
+						setIsRunning(false);
+						setShowTerminal(false);
+						setShowCompletionTerminal(true);
+						sendNotification();
+						return 0;
+					}
+					return prev - 1;
+				});
+			}, 1000);
+		}
+
+		return () => clearInterval(interval);
+	}, [isRunning, totalSeconds, notificationSettings]);
 
 	return (
 		<div
@@ -282,7 +417,12 @@ function App() {
 					type="complete"
 				/>
 			)}
-			<TimeInputModal isOpen={showModal} onClose={handleTimeSet} />
+			<TimeInputModal
+				isOpen={showModal}
+				onClose={handleTimeSet}
+				notificationSettings={notificationSettings}
+				onNotificationChange={setNotificationSettings}
+			/>
 		</div>
 	);
 }
