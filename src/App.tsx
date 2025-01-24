@@ -385,7 +385,7 @@ function App() {
 	}, [hours, minutes, seconds]);
 
 	useEffect(() => {
-		const defaultTitle = "Simer";
+		const defaultTitle = "Simpletimerr";
 
 		if (isRunning && totalSeconds > 0) {
 			document.title = `(${formatTime(totalSeconds)}) ${defaultTitle}`;
