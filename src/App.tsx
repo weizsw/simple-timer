@@ -281,7 +281,14 @@ function TimeInputModal({
 const Terminal = ({
 	onClose,
 	type = "start",
-}: { onClose: () => void; type?: "start" | "complete" }) => {
+	startTime,
+	endTime,
+}: {
+	onClose: () => void;
+	type?: "start" | "complete";
+	startTime?: Date;
+	endTime?: Date;
+}) => {
 	return (
 		<div
 			className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 
@@ -299,7 +306,9 @@ const Terminal = ({
 				<div className="animate-typing">
 					{type === "complete" ? (
 						<>
-							<p>$ timer sequence completed!</p>
+							<p>
+								$ timer sequence completed at {endTime?.toLocaleTimeString()}!
+							</p>
 							<p className="mt-2">$ initiating shutdown sequence...</p>
 							<p className="mt-2">$ saving session data...</p>
 							<p className="mt-2">$ terminating processes...</p>
@@ -307,7 +316,10 @@ const Terminal = ({
 						</>
 					) : (
 						<>
-							<p>$ initiating timer sequence...</p>
+							<p>
+								$ initiating timer sequence at {startTime?.toLocaleTimeString()}
+								...
+							</p>
 							<p className="mt-2">$ loading system components...</p>
 							<p className="mt-2">$ calibrating time measurements...</p>
 							<p className="mt-2">$ establishing notification protocols...</p>
@@ -336,6 +348,8 @@ function App() {
 			const saved = localStorage.getItem("notificationSettings");
 			return saved ? JSON.parse(saved) : { service: "none" };
 		});
+	const [startTime, setStartTime] = useState<Date>();
+	const [endTime, setEndTime] = useState<Date>();
 
 	useEffect(() => {
 		if (darkMode) {
@@ -355,6 +369,7 @@ function App() {
 						setIsRunning(false);
 						setShowTerminal(false);
 						setShowCompletionTerminal(true);
+						setEndTime(new Date());
 						return 0;
 					}
 					return prev - 1;
@@ -448,6 +463,7 @@ function App() {
 						setIsRunning(false);
 						setShowTerminal(false);
 						setShowCompletionTerminal(true);
+						setEndTime(new Date());
 						sendNotification();
 						return 0;
 					}
@@ -494,6 +510,7 @@ function App() {
 							onClick={() => {
 								setIsRunning(true);
 								setShowTerminal(true);
+								setStartTime(new Date());
 							}}
 							className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
 						>
@@ -520,12 +537,17 @@ function App() {
 			</div>
 
 			{showTerminal && (
-				<Terminal onClose={() => setShowTerminal(false)} type="start" />
+				<Terminal
+					onClose={() => setShowTerminal(false)}
+					type="start"
+					startTime={startTime}
+				/>
 			)}
 			{showCompletionTerminal && (
 				<Terminal
 					onClose={() => setShowCompletionTerminal(false)}
 					type="complete"
+					endTime={endTime}
 				/>
 			)}
 			<TimeInputModal
