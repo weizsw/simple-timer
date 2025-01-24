@@ -46,7 +46,7 @@ function TimeInputModal({
 		) {
 			try {
 				const response = await fetch(
-					`https://api.day.app/${notificationSettings.barkKey}/Test Notification?level=critical&volume=5`,
+					`https://api.day.app/${notificationSettings.barkKey}/Test Notification?level=critical&volume=2`,
 				);
 				if (response.ok) {
 					toast.success("Bark notification sent successfully");
