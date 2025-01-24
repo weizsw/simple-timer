@@ -360,27 +360,6 @@ function App() {
 	}, [darkMode]);
 
 	useEffect(() => {
-		let interval: number;
-
-		if (isRunning && totalSeconds > 0) {
-			interval = setInterval(() => {
-				setTotalSeconds((prev) => {
-					if (prev <= 1) {
-						setIsRunning(false);
-						setShowTerminal(false);
-						setShowCompletionTerminal(true);
-						setEndTime(new Date());
-						return 0;
-					}
-					return prev - 1;
-				});
-			}, 1000);
-		}
-
-		return () => clearInterval(interval);
-	}, [isRunning, totalSeconds]);
-
-	useEffect(() => {
 		setTotalSeconds(hours * 3600 + minutes * 60 + seconds);
 	}, [hours, minutes, seconds]);
 
