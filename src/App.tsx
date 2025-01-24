@@ -445,7 +445,7 @@ function App() {
 		) {
 			try {
 				await fetch(
-					`https://${notificationSettings.serverChan3.uid}.push.ft07.com/send/${notificationSettings.serverChan3.key}.send?title=Simer Notification&desp=Time to go home!`,
+					`https://${notificationSettings.serverChan3.uid}.push.ft07.com/send/${notificationSettings.serverChan3.key}.send?title=Simpletimerr Notification&desp=Time to go home!`,
 				);
 			} catch (error) {
 				console.error("Failed to send notification:", error);
