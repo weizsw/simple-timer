@@ -433,25 +433,38 @@ function App() {
 	};
 
 	useEffect(() => {
-		let interval: number;
+		let animationFrameId: number;
+		let targetEndTime: number;
 
 		if (isRunning && totalSeconds > 0) {
-			interval = setInterval(() => {
-				setTotalSeconds((prev) => {
-					if (prev <= 1) {
-						setIsRunning(false);
-						setShowTerminal(false);
-						setShowCompletionTerminal(true);
-						setEndTime(new Date());
-						sendNotification();
-						return 0;
-					}
-					return prev - 1;
-				});
-			}, 1000);
+			targetEndTime = Date.now() + totalSeconds * 1000;
+
+			const tick = () => {
+				const now = Date.now();
+				const remaining = Math.max(0, Math.ceil((targetEndTime - now) / 1000));
+
+				if (remaining <= 0) {
+					setIsRunning(false);
+					setShowTerminal(false);
+					setShowCompletionTerminal(true);
+					setEndTime(new Date());
+					sendNotification();
+					setTotalSeconds(0);
+					return;
+				}
+
+				setTotalSeconds(remaining);
+				animationFrameId = requestAnimationFrame(tick);
+			};
+
+			animationFrameId = requestAnimationFrame(tick);
 		}
 
-		return () => clearInterval(interval);
+		return () => {
+			if (animationFrameId) {
+				cancelAnimationFrame(animationFrameId);
+			}
+		};
 	}, [isRunning, totalSeconds, notificationSettings]);
 
 	return (
